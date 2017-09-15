@@ -1,5 +1,10 @@
 # api-boot (Microservice)
 Developed a microservice using SpringBoot. It has 3 layers: controller, service and repository. Let's have a look at the code.
+
+Here is the project structure.
+
+![application structure](https://github.com/anurag012/api-boot/blob/master/api-package.JPG)
+
 ### Application.java
 This is the main class that runs the application.
 ```
@@ -12,10 +17,12 @@ public class Application {
 	}
 }
 ```
+
 Here, just annotating the class with **@SpringBootApplication** makes it a spring boot application.
 **SwaggerConfig** class contains the swagger configuration. It is **optional** and not required to develop a microservice.
 
 In SpringBoot, you don't need to create separate bean definitions for configuring your database with JPA or allowing CORS. It comes embedded with SpringBoot. You just have to set some properties.
+
 ### resources/application.properties
 ```
 server.port=9000
@@ -32,6 +39,18 @@ spring.jpa.hibernate.ddl-auto=create
 spring.jpa.show-sql=true
 ```
 Here you can prefix your URL, assign a specific port, setup database connections with predefined properties of SpringBoot.
+
+### entity/User.java
+This is a simple java class with getters and setters. It is the class which is used for object to relational mapping for communicating with database.
+```
+@Entity
+public class User {
+
+	@Id
+	private String id;
+	private String firstName;
+	private String lastName;
+```
 
 Now, let's have a look at 3 layers.
 
@@ -101,3 +120,22 @@ The mechanism strips the prefixes from method and starts parsing the rest of it.
 e.g. **findByEmail**. Here the first **By** indicates the start of actual criteria which means we want to search by the **email**.
 
 These are the main components of the application.
+
+I have also used Docker to containerize my microservice.
+This is the file for it.
+
+### deployments/Dockerfile
+```
+FROM frolvlad/alpine-oraclejdk8:slim
+VOLUME /tmp
+ADD api-boot-0.0.1.jar api.jar
+RUN sh -c 'touch /api.jar'
+ENV JAVA_OPTS="-Dspring.profiles.active=prod"
+ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /api.jar" ]
+```
+The **FROM** instruction initializes a new build stage and sets the base image for subsequent instructions. My base image is Alpine Linux and have java as well.
+
+We added a **VOLUME** pointing to "/tmp" because that is where a Spring Boot application creates working directories for Tomcat by default.
+
+To reduce Tomcat startup time we added a system property pointing to "/dev/urandom" as a source of entropy.
+The project JAR file is **ADD**ed to the container as **api.jar** and then executed in **ENTRYPOINT**.
