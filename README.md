@@ -1,4 +1,4 @@
-# api-boot (Microservice)
+# Profile_Registeration (Microservice)
 Developed a microservice using SpringBoot. It has 3 layers: controller, service and repository. Let's have a look at the code.
 
 Here is the project structure.
